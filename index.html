@@ -119,18 +119,18 @@
   <div class="pagination" id="paginationContainer"></div>
 
   <script>
-    const linksPerPage = 5; // Change this value to adjust the number of links per page
+  const linksPerPage = 5; // Change this value to adjust the number of links per page
 
-    fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/contents/HTML')
-      .then(response => response.json())
-      .then(data => {
-        const fileLinks = data.filter(file => file.name.endsWith('.html'));
-        const totalPages = Math.ceil(fileLinks.length / linksPerPage);
+fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/contents/HTML')
+  .then(response => response.json())
+  .then(data => {
+    const fileLinks = data.filter(item => item.name.endsWith('.html'));
+    const totalPages = Math.ceil(fileLinks.length / linksPerPage);
 
-        const linksContainer = document.getElementById('linksContainer');
-        const paginationContainer = document.getElementById('paginationContainer');
-        const searchInput = document.getElementById('searchInput');
-        const searchDropdown = document.getElementById('searchDropdown');
+    const linksContainer = document.getElementById('linksContainer');
+    const paginationContainer = document.getElementById('paginationContainer');
+    const searchInput = document.getElementById('searchInput');
+    const searchDropdown = document.getElementById('searchDropdown');
 
         searchInput.addEventListener('input', () => {
           const searchText = searchInput.value.toLowerCase();
@@ -165,95 +165,95 @@
         }
 
         function displayLinks(page) {
-          const startIndex = (page - 1) * linksPerPage;
-          const endIndex = startIndex + linksPerPage;
-          const linksToShow = fileLinks.slice(startIndex, endIndex);
+        const startIndex = (page - 1) * linksPerPage;
+        const endIndex = startIndex + linksPerPage;
+        const linksToShow = fileLinks.slice(startIndex, endIndex);
 
-          linksContainer.innerHTML = '';
+        linksContainer.innerHTML = '';
 
-          const table = document.createElement('table');
-          table.className = 'links-table';
+        const table = document.createElement('table');
+        table.className = 'links-table';
 
-          const tableHeader = document.createElement('tr');
-          const nameHeader = document.createElement('th');
-          const dateHeader = document.createElement('th');
-          const timeHeader = document.createElement('th');
+        const tableHeader = document.createElement('tr');
+        const nameHeader = document.createElement('th');
+        const dateHeader = document.createElement('th');
+        const timeHeader = document.createElement('th');
 
-          nameHeader.innerText = 'Topic';
-          dateHeader.innerText = 'Date of Creation';
-          timeHeader.innerText = 'Time';
+        nameHeader.innerText = 'Topic';
+        dateHeader.innerText = 'Date of Creation';
+        timeHeader.innerText = 'Time';
 
-          tableHeader.appendChild(nameHeader);
-          tableHeader.appendChild(dateHeader);
-          tableHeader.appendChild(timeHeader);
-          table.appendChild(tableHeader);
+        tableHeader.appendChild(nameHeader);
+        tableHeader.appendChild(dateHeader);
+        tableHeader.appendChild(timeHeader);
+        table.appendChild(tableHeader);
 
-          linksToShow.forEach(async file => {
-            const fileName = file.name;
-            const filePath = file.path;
+        linksToShow.forEach(async link => {
+          const name = link.name;
+          const href = link.download_url;
 
-            const tableRow = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            const dateCell = document.createElement('td');
-            const timeCell = document.createElement('td');
-            const linkElement = document.createElement('a');
+          const tableRow = document.createElement('tr');
+          const nameCell = document.createElement('td');
+          const dateCell = document.createElement('td');
+          const timeCell = document.createElement('td');
+          const linkElement = document.createElement('a');
 
-            linkElement.href = filePath.startsWith('HTML/') ? filePath : `HTML/${filePath}`;
-            linkElement.innerText = fileName;
+          linkElement.href = href.startsWith('html/') ? href : `${href}`;
+          linkElement.innerText = name.substring(0, name.lastIndexOf('.html') + 5);
 
-            const response = await fetch(file.download_url);
-            const fileDate = new Date(response.headers.get('last-modified'));
+          const response = await fetch(href);
+          const fileDate = new Date(link.last_modified);
 
-            if (!isNaN(fileDate)) {
-              const formattedDate = fileDate.toLocaleDateString();
-              const formattedTime = fileDate.toLocaleTimeString();
+          if (!isNaN(fileDate)) {
+            const formattedDate = fileDate.toLocaleDateString();
+            const formattedTime = fileDate.toLocaleTimeString();
 
-              dateCell.innerText = formattedDate;
-              timeCell.innerText = formattedTime;
-            } else {
-              dateCell.innerText = 'N/A';
-              timeCell.innerText = 'N/A';
-            }
+            dateCell.innerText = formattedDate;
+            timeCell.innerText = formattedTime;
+          } else {
+            dateCell.innerText = 'N/A';
+            timeCell.innerText = 'N/A';
+          }
 
-            nameCell.appendChild(linkElement);
+          nameCell.appendChild(linkElement);
 
-            tableRow.appendChild(nameCell);
-            tableRow.appendChild(dateCell);
-            tableRow.appendChild(timeCell);
-            table.appendChild(tableRow);
+          tableRow.appendChild(nameCell);
+          tableRow.appendChild(dateCell);
+          tableRow.appendChild(timeCell);
+          table.appendChild(tableRow);
+        });
+
+        linksContainer.appendChild(table);
+
+        displayPagination(page);
+      }
+
+      function displayPagination(currentPage) {
+        paginationContainer.innerHTML = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+          const pageLink = document.createElement('a');
+          pageLink.href = '#';
+          pageLink.innerText = i;
+
+          if (i === currentPage) {
+            pageLink.classList.add('active');
+          }
+
+          pageLink.addEventListener('click', () => {
+            displayLinks(i);
           });
 
-          linksContainer.appendChild(table);
-
-          displayPagination(page);
+          paginationContainer.appendChild(pageLink);
         }
+      }
 
-        function displayPagination(currentPage) {
-          paginationContainer.innerHTML = '';
-
-          for (let i = 1; i <= totalPages; i++) {
-            const pageLink = document.createElement('a');
-            pageLink.href = '#';
-            pageLink.innerText = i;
-
-            if (i === currentPage) {
-              pageLink.classList.add('active');
-            }
-
-            pageLink.addEventListener('click', () => {
-              displayLinks(i);
-            });
-
-            paginationContainer.appendChild(pageLink);
-          }
-        }
-
-        displayLinks(1);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-  </script>
+      displayLinks(1);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+</script>
 </body>
 
 </html>
