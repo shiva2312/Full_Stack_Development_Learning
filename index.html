@@ -18,8 +18,6 @@
   <body>
     <h1>Welcome to My Website</h1>
 
-    <input type="text" id="searchInput" placeholder="Search file name">
-
     <table id="fileTable">
       <thead>
         <tr>
@@ -38,38 +36,27 @@
         .then(response => response.json())
         .then(data => {
           const fileTableBody = document.getElementById('fileTableBody');
-          const fileNames = data.map(file => file.name);
 
-          const searchInput = document.getElementById('searchInput');
-          searchInput.addEventListener('input', function() {
-            const searchQuery = this.value.toLowerCase();
-            const filteredFiles = data.filter(file =>
-              file.name.toLowerCase().includes(searchQuery)
-            );
+          data.forEach(file => {
+            const fileName = file.name.split('.')[0];
+            const date = new Date(file.size);
+            const dateStr = date.toLocaleDateString();
+            const timeStr = date.toLocaleTimeString();
 
-            fileTableBody.innerHTML = '';
+            const row = document.createElement('tr');
+            const fileNameCell = document.createElement('td');
+            const dateCell = document.createElement('td');
+            const timeCell = document.createElement('td');
 
-            filteredFiles.forEach(file => {
-              const fileName = file.name.split('.')[0];
-              const date = new Date(file.size);
-              const dateStr = date.toLocaleDateString();
-              const timeStr = date.toLocaleTimeString();
+            fileNameCell.textContent = fileName;
+            dateCell.textContent = dateStr;
+            timeCell.textContent = timeStr;
 
-              const row = document.createElement('tr');
-              const fileNameCell = document.createElement('td');
-              const dateCell = document.createElement('td');
-              const timeCell = document.createElement('td');
+            row.appendChild(fileNameCell);
+            row.appendChild(dateCell);
+            row.appendChild(timeCell);
 
-              fileNameCell.textContent = fileName;
-              dateCell.textContent = dateStr;
-              timeCell.textContent = timeStr;
-
-              row.appendChild(fileNameCell);
-              row.appendChild(dateCell);
-              row.appendChild(timeCell);
-
-              fileTableBody.appendChild(row);
-            });
+            fileTableBody.appendChild(row);
           });
         })
         .catch(error => {
