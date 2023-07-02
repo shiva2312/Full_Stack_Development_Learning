@@ -1,265 +1,80 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>My Website</title>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
 
-<head>
-  <title>My Website</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
+      th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome to My Website</h1>
 
-    h1 {
-      text-align: center;
-    }
+    <input type="text" id="searchInput" placeholder="Search file name">
 
-    .search-container {
-      position: relative;
-      text-align: center;
-      margin-top: 20px;
-    }
+    <table id="fileTable">
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Date of Creation</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="fileTableBody">
+        <!-- File details will be dynamically added here -->
+      </tbody>
+    </table>
 
-    .search-input {
-      padding: 10px;
-      width: 300px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: box-shadow 0.3s;
-    }
+    <script>
+      fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/contents/HTML')
+        .then(response => response.json())
+        .then(data => {
+          const fileTableBody = document.getElementById('fileTableBody');
+          const fileNames = data.map(file => file.name);
 
-    .search-input:focus {
-      outline: none;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
+          const searchInput = document.getElementById('searchInput');
+          searchInput.addEventListener('input', function() {
+            const searchQuery = this.value.toLowerCase();
+            const filteredFiles = data.filter(file =>
+              file.name.toLowerCase().includes(searchQuery)
+            );
 
-    .search-dropdown {
-      position: absolute;
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
-      width: 300px;
-      max-height: 200px;
-      overflow-y: auto;
-      display: none;
-      z-index: 1;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-top: 10px;
-    }
+            fileTableBody.innerHTML = '';
 
+            filteredFiles.forEach(file => {
+              const fileName = file.name.split('.')[0];
+              const date = new Date(file.size);
+              const dateStr = date.toLocaleDateString();
+              const timeStr = date.toLocaleTimeString();
 
-    .search-dropdown a {
-      display: block;
-      padding: 8px;
-      text-decoration: none;
-      color: #333;
-      transition: background-color 0.3s;
-    }
+              const row = document.createElement('tr');
+              const fileNameCell = document.createElement('td');
+              const dateCell = document.createElement('td');
+              const timeCell = document.createElement('td');
 
-    .search-dropdown a:hover {
-      background-color: #f2f2f2;
-    }
+              fileNameCell.textContent = fileName;
+              dateCell.textContent = dateStr;
+              timeCell.textContent = timeStr;
 
-    .links-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
+              row.appendChild(fileNameCell);
+              row.appendChild(dateCell);
+              row.appendChild(timeCell);
 
-    .links-table th,
-    .links-table td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .links-table th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .pagination a {
-      color: #333;
-      padding: 8px 12px;
-      text-decoration: none;
-      transition: background-color 0.3s;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      margin: 0 4px;
-    }
-
-    .pagination a:hover {
-      background-color: #f2f2f2;
-    }
-
-    .pagination .active {
-      background-color: #4caf50;
-      color: white;
-    }
-  </style>
-</head>
-
-<body>
-  <a href="HTML/Basic.html">KYA BAAT H </a>
-  <h1>Welcome to Full Stack Development Learning</h1>
-
-  <div class="search-container">
-    <input type="text" id="searchInput" class="search-input" placeholder="Search Topic...">
-    <div id="searchDropdown" class="search-dropdown"></div>
-  </div>
-
-  <div id="linksContainer">
-    <!-- Links will be dynamically added here -->
-  </div>
-
-  <div class="pagination" id="paginationContainer"></div>
-
-  <script>
-    const linksPerPage = 5; // Change this value to adjust the number of links per page
-
-    fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/contents/HTML')
-
-      .then(response => response.text())
-      .then(html => {
-        const parser = new DOMParser();
-        const htmlDocument = parser.parseFromString(html, 'text/html');
-
-        const fileLinks = Array.from(htmlDocument.getElementsByTagName('a')).filter(link => link.href.endsWith('.html'));
-        const totalPages = Math.ceil(fileLinks.length / linksPerPage);
-
-        const linksContainer = document.getElementById('linksContainer');
-        const paginationContainer = document.getElementById('paginationContainer');
-        const searchInput = document.getElementById('searchInput');
-        const searchDropdown = document.getElementById('searchDropdown');
-
-        searchInput.addEventListener('input', () => {
-          const searchText = searchInput.value.toLowerCase();
-          const filteredLinks = fileLinks.filter(link => link.innerText.toLowerCase().includes(searchText));
-
-          displaySearchDropdown(filteredLinks);
+              fileTableBody.appendChild(row);
+            });
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
         });
-
-        function displaySearchDropdown(filteredLinks) {
-          searchDropdown.innerHTML = '';
-
-          if (filteredLinks.length === 0 || searchInput.value === '') {
-            searchDropdown.style.display = 'none';
-            return;
-          }
-
-          searchDropdown.style.display = 'block';
-
-          filteredLinks.forEach(link => {
-            const linkText = link.innerText;
-            const option = document.createElement('a');
-            option.href = link.getAttribute('href');
-            option.innerText = linkText;
-
-            option.addEventListener('click', () => {
-              searchInput.value = linkText;
-              searchDropdown.style.display = 'none';
-            });
-
-            searchDropdown.appendChild(option);
-          });
-        }
-
-        function displayLinks(page) {
-          const startIndex = (page - 1) * linksPerPage;
-          const endIndex = startIndex + linksPerPage;
-          const linksToShow = fileLinks.slice(startIndex, endIndex);
-
-          linksContainer.innerHTML = '';
-
-          const table = document.createElement('table');
-          table.className = 'links-table';
-
-          const tableHeader = document.createElement('tr');
-          const nameHeader = document.createElement('th');
-          const dateHeader = document.createElement('th');
-          const timeHeader = document.createElement('th');
-
-          nameHeader.innerText = 'Topic';
-          dateHeader.innerText = 'Date of Creation';
-          timeHeader.innerText = 'Time';
-
-          tableHeader.appendChild(nameHeader);
-          tableHeader.appendChild(dateHeader);
-          tableHeader.appendChild(timeHeader);
-          table.appendChild(tableHeader);
-
-          linksToShow.forEach(async link => {
-            const name = link.innerText;
-            const href = link.getAttribute('href');
-
-            const tableRow = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            const dateCell = document.createElement('td');
-            const timeCell = document.createElement('td');
-            const linkElement = document.createElement('a');
-
-            linkElement.href = href.startsWith('html/') ? href : `${href}`;
-            linkElement.innerText = name.substring(0, name.lastIndexOf('.html') + 5);
-
-            const response = await fetch(href);
-            const fileDate = new Date(response.headers.get('last-modified'));
-
-            if (!isNaN(fileDate)) {
-              const formattedDate = fileDate.toLocaleDateString();
-              const formattedTime = fileDate.toLocaleTimeString();
-
-              dateCell.innerText = formattedDate;
-              timeCell.innerText = formattedTime;
-            } else {
-              dateCell.innerText = 'N/A';
-              timeCell.innerText = 'N/A';
-            }
-
-            nameCell.appendChild(linkElement);
-
-            tableRow.appendChild(nameCell);
-            tableRow.appendChild(dateCell);
-            tableRow.appendChild(timeCell);
-            table.appendChild(tableRow);
-          });
-
-          linksContainer.appendChild(table);
-
-          displayPagination(page);
-        }
-
-        function displayPagination(currentPage) {
-          paginationContainer.innerHTML = '';
-
-          for (let i = 1; i <= totalPages; i++) {
-            const pageLink = document.createElement('a');
-            pageLink.href = '#';
-            pageLink.innerText = i;
-
-            if (i === currentPage) {
-              pageLink.classList.add('active');
-            }
-
-            pageLink.addEventListener('click', () => {
-              displayLinks(i);
-            });
-
-            paginationContainer.appendChild(pageLink);
-          }
-        }
-
-        displayLinks(1);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-  </script>
-</body>
-
+    </script>
+  </body>
 </html>
