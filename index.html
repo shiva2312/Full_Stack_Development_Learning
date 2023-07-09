@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>My Website</title>
   <style>
@@ -103,7 +102,6 @@
     }
   </style>
 </head>
-
 <body>
   <h1>Welcome to Full Stack Development Learning</h1>
 
@@ -119,18 +117,18 @@
   <div class="pagination" id="paginationContainer"></div>
 
   <script>
-  const linksPerPage = 5; // Change this value to adjust the number of links per page
+    const linksPerPage = 5; // Change this value to adjust the number of links per page
 
-fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/contents/HTML')
-  .then(response => response.json())
-  .then(data => {
-    const fileLinks = data.filter(item => item.name.endsWith('.html'));
-    const totalPages = Math.ceil(fileLinks.length / linksPerPage);
+    fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/contents/HTML')
+      .then(response => response.json())
+      .then(data => {
+        const fileLinks = data.filter(item => item.name.endsWith('.html'));
+        const totalPages = Math.ceil(fileLinks.length / linksPerPage);
 
-    const linksContainer = document.getElementById('linksContainer');
-    const paginationContainer = document.getElementById('paginationContainer');
-    const searchInput = document.getElementById('searchInput');
-    const searchDropdown = document.getElementById('searchDropdown');
+        const linksContainer = document.getElementById('linksContainer');
+        const paginationContainer = document.getElementById('paginationContainer');
+        const searchInput = document.getElementById('searchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
 
         searchInput.addEventListener('input', () => {
           const searchText = searchInput.value.toLowerCase();
@@ -139,7 +137,7 @@ fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/co
           displaySearchDropdown(filteredLinks);
         });
 
-        function displaySearchDropdown(filteredLinks) {
+        async function displaySearchDropdown(filteredLinks) {
           searchDropdown.innerHTML = '';
 
           if (filteredLinks.length === 0 || searchInput.value === '') {
@@ -149,7 +147,7 @@ fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/co
 
           searchDropdown.style.display = 'block';
 
-          filteredLinks.forEach(file => {
+          for (const file of filteredLinks) {
             const fileName = file.name;
             const option = document.createElement('a');
             option.href = fileName.startsWith('HTML/') ? fileName : `HTML/${fileName}`;
@@ -161,10 +159,10 @@ fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/co
             });
 
             searchDropdown.appendChild(option);
-          });
+          }
         }
 
-        function displayLinks(page) {
+        async function displayLinks(page) {
           const startIndex = (page - 1) * linksPerPage;
           const endIndex = startIndex + linksPerPage;
           const linksToShow = fileLinks.slice(startIndex, endIndex);
@@ -188,7 +186,9 @@ fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/co
           tableHeader.appendChild(timeHeader);
           table.appendChild(tableHeader);
 
-          linksToShow.forEach(async file => {
+          const sortedLinks = [];
+
+          for (const file of linksToShow) {
             const fileName = file.name;
             const filePath = file.path;
 
@@ -201,7 +201,7 @@ fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/co
             linkElement.href = filePath.startsWith('HTML/') ? filePath : `HTML/${filePath}`;
             linkElement.innerText = fileName;
 
-            const response = await fetch(file.download_url);
+            const response = await fetch(file.url);
             const fileDate = new Date(response.headers.get('last-modified'));
 
             if (!isNaN(fileDate)) {
@@ -210,6 +210,8 @@ fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/co
 
               dateCell.innerText = formattedDate;
               timeCell.innerText = formattedTime;
+
+              sortedLinks.push({ file, date: fileDate });
             } else {
               dateCell.innerText = 'N/A';
               timeCell.innerText = 'N/A';
@@ -221,7 +223,9 @@ fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/co
             tableRow.appendChild(dateCell);
             tableRow.appendChild(timeCell);
             table.appendChild(tableRow);
-          });
+          }
+
+          sortedLinks.sort((a, b) => b.date - a.date);
 
           linksContainer.appendChild(table);
 
@@ -255,5 +259,4 @@ fetch('https://api.github.com/repos/shiva2312/Full_Stack_Development_Learning/co
       });
   </script>
 </body>
-
 </html>
