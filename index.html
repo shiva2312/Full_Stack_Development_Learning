@@ -102,6 +102,23 @@
       background-color: #4caf50;
       color: white;
     }
+
+    .footer {
+      background-color: #333;
+      color: #fff;
+      padding: 20px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .footer p {
+      margin: 0;
+      text-align: center;
+    }
+
+
   </style>
 </head>
 <body>
@@ -117,7 +134,10 @@
   </div>
 
   <div class="pagination" id="paginationContainer"></div>
-
+  <div class="footer">
+    <p>&copy; 2023 My Website. All rights reserved.</p>
+    <p id="visitorCount">Total visitors: 0</p>
+  </div>
   <script>
     const linksPerPage = 5; // Change this value to adjust the number of links per page
 
@@ -259,6 +279,17 @@
       .catch(error => {
         console.error('Error:', error);
       });
+
+      let visitorCount = 0;
+
+// Function to update visitor count
+function updateVisitorCount() {
+  visitorCount++;
+  document.getElementById('visitorCount').innerText = 'Total visitors: ' + visitorCount;
+}
+
+// Call the function to increment the visitor count on page load
+updateVisitorCount();
   </script>
 </body>
 </html>
