@@ -283,16 +283,8 @@
 // Function to update visitor count
 function updateVisitorCount() {
       let visitorCount = localStorage.getItem('visitorCount') || 0;
-      let uniqueIPs = JSON.parse(localStorage.getItem('uniqueIPs')) || [];
-      const currentIP = '127.0.0.1'; // Replace with actual method to get visitor's IP address
-
-      if (!uniqueIPs.includes(currentIP)) {
-        uniqueIPs.push(currentIP);
-        localStorage.setItem('uniqueIPs', JSON.stringify(uniqueIPs));
-        visitorCount++;
-        localStorage.setItem('visitorCount', visitorCount);
-      }
-
+      visitorCount++;
+      localStorage.setItem('visitorCount', visitorCount);
       document.getElementById('visitorCount').innerText = 'Total visitors: ' + visitorCount;
     }
 
