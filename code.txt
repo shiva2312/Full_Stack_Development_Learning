@@ -1,0 +1,78 @@
+instrument {
+    name = 'ETM PROFIT22',
+    short_name = 'ETM',
+    icon = 'https://etmtradingbucket.s3.amazonaws.com/public/logo.png',
+    overlay = true
+}
+
+Signal_period = input(5, "VIP | Signals Period", input.integer, 1, 1000, 1)
+
+input_group {
+    "Compra Proxima vela",
+    colorBuy = input { default = "green", type = input.color },
+    visibleBuy = input { default = true, type = input.plot_visibility }
+}
+
+input_group {
+    "Venda Proxima vela",
+    colorSell = input { default = "red", type = input.color },
+    visibleSell = input { default = true, type = input.plot_visibility }
+}
+
+input_group {
+    "MACD",
+    "Slow and fast EMA periods, used in MACD calculation",
+    fast = input(12, "front.platform.fast period", input.integer, 1, 250),
+    slow = input(26, "front.platform.fast period", input.integer, 1, 250)
+}
+
+input_group {
+    "front.platform.signal-line",
+    "Reference signal series period",
+    signal_period = input(9, "front.period", input.integer, 1, 250)
+}
+
+input_group {
+    "front.newind.emaperiod",
+    ema_period = input(13, "front.period", input.integer, 1, 250)
+}
+
+input_group {
+    "front.newind.barcolors",
+    positive = input { default = "#2CAC40", type = input.color },
+    neutral = input { default = "#C7CAD1", type = input.color },
+    negative = input { default = "#DB4931", type = input.color },
+}
+
+fastMA = ema(close, fast)
+slowMA = ema(close, slow)
+macd = fastMA - slowMA
+signal = sma(macd, signal_period)
+hist = macd - signal
+ema13 = ema(close, ema_period)
+
+local bar_color
+if ema13 > ema13[1] and hist > hist[1] then
+    bar_color = positive
+elseif ema13 < ema13[1] and hist < hist[1] then
+    bar_color = negative
+else
+    bar_color = neutral
+end
+
+plot_candle(open, high, low, close, "ES", bar_color)
+
+local wasPositive = (ema13[1] > ema13[2] and hist[1] > hist[2])
+local wasNegative = (ema13[1] < ema13[2] and hist[1] < hist[2])
+
+local startBuyTrend = bar_color == positive and not wasPositive
+local startSellTrend = bar_color == negative and not wasNegative
+
+-- Check if it's a new trend to plot shape for buy or sell
+if startBuyTrend and visibleBuy then
+    plot_shape(true, "", shape_style.triangleup, shape_size.huge, colorBuy, shape_location.belowbar, 0, "RX-Buy", "green")
+end
+
+if startSellTrend and visibleSell then
+    plot_shape(true, "ENTER", shape_style.triangledown, shape_size.huge, colorSell, shape_location.abovebar, 0, "RX-Sell", "red")
+end
